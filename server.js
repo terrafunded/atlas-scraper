@@ -1,7 +1,17 @@
 import express from "express";
 import { chromium } from "playwright-core";
+import { execSync } from "child_process";
 
 const app = express();
+
+// 🧩 Forzar instalación de Chromium si no existe
+try {
+  console.log("🔧 Verificando instalación de Chromium...");
+  execSync("npx playwright install chromium", { stdio: "inherit" });
+  console.log("✅ Chromium instalado o ya presente.");
+} catch (err) {
+  console.error("❌ Error instalando Chromium:", err.message);
+}
 
 app.get("/api/scrape", async (req, res) => {
   const target = req.query.url;
