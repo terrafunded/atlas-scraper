@@ -1,18 +1,21 @@
+import express from "express";
 import { chromium } from "playwright-core";
-import { NextRequest, NextResponse } from "next/server";
 
-export const config = { runtime: "edge" };
+const app = express();
 
-export default async function handler(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const target = searchParams.get("url");
+app.get("/api/scrape", async (req, res) => {
+  const target = req.query.url as string;
 
   if (!target) {
-    return NextResponse.json({ error: "Missing url parameter" }, { status: 400 });
+    return res.status(400).json({ error: "Missing url parameter" });
   }
 
   try {
-    const browser = await chromium.launch({ args: ["--no-sandbox"], headless: true });
+    const browser = await chromium.launch({
+      args: ["--no-sandbox"],
+      headless: true,
+    });
+
     const page = await browser.newPage();
     await page.goto(target, { waitUntil: "load", timeout: 60000 });
     await page.waitForTimeout(3000);
@@ -20,8 +23,16 @@ export default async function handler(req: NextRequest) {
     const html = await page.content();
     await browser.close();
 
-    return new NextResponse(html, { status: 200, headers: { "Content-Type": "text/html" } });
+    res.setHeader("Content-Type", "text/html");
+    res.status(200).send(html);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message || "Scrape failed" }, { status: 500 });
+    console.error("Scrape error:", error.message);
+    res.status(500).json({ error: error.message || "Scrape failed" });
   }
-}
+});
+
+// 🚀 Render expects the app to listen on process.env.PORT
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`✅ Atlas Scraper running on port ${PORT}`);
+});
