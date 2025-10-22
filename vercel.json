@@ -1,9 +1,12 @@
 {
   "version": 2,
-  "builds": [
-    { "src": "api/scrape.ts", "use": "@vercel/node" }
-  ],
+  "functions": {
+    "api/scrape.ts": {
+      "runtime": "nodejs18.x"
+    }
+  },
   "routes": [
     { "src": "/api/scrape", "dest": "api/scrape.ts" }
   ]
 }
+
