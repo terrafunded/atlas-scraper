@@ -1,0 +1,8 @@
+{
+  "name": "atlas-scraper",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "playwright-core": "^1.41.0"
+  }
+}
