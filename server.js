@@ -1,35 +1,30 @@
 import express from "express";
-import { chromium } from "playwright-core";
 import { execSync } from "child_process";
+import { chromium } from "playwright";
 
 const app = express();
 
-// 🧩 Forzar instalación de Chromium si no existe
+// --- Ensure Chromium is present every time the service starts ---
 try {
-  console.log("🔧 Verificando instalación de Chromium...");
-  execSync("npx playwright install chromium", { stdio: "inherit" });
-  console.log("✅ Chromium instalado o ya presente.");
+  console.log("🔧 Installing Chromium in runtime...");
+  execSync("npx playwright install chromium --with-deps", { stdio: "inherit" });
+  console.log("✅ Chromium installed.");
 } catch (err) {
-  console.error("❌ Error instalando Chromium:", err.message);
+  console.error("❌ Chromium install failed:", err.message);
 }
 
 app.get("/api/scrape", async (req, res) => {
   const target = req.query.url;
-
-  if (!target) {
-    return res.status(400).json({ error: "Missing url parameter" });
-  }
+  if (!target) return res.status(400).json({ error: "Missing url parameter" });
 
   try {
     const browser = await chromium.launch({
-      args: ["--no-sandbox"],
-      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      headless: true
     });
 
     const page = await browser.newPage();
     await page.goto(target, { waitUntil: "load", timeout: 60000 });
-    await page.waitForTimeout(3000);
-
     const html = await page.content();
     await browser.close();
 
@@ -42,6 +37,4 @@ app.get("/api/scrape", async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`✅ Atlas Scraper running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`✅ Atlas Scraper running on port ${PORT}`));
