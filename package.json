@@ -2,7 +2,11 @@
   "name": "atlas-scraper",
   "version": "1.0.0",
   "type": "module",
+  "scripts": {
+    "start": "node api/scrape.ts"
+  },
   "dependencies": {
+    "express": "^4.18.2",
     "playwright-core": "^1.41.0"
   }
 }
