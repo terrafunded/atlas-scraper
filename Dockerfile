@@ -1,28 +1,18 @@
-# ✅ Dockerfile for Atlas Scraper on Render
-FROM node:18-bullseye
+# Usa imagen base Node.js
+FROM node:22
 
-# Install system dependencies for Playwright
-RUN apt-get update && \
-    apt-get install -y wget gnupg ca-certificates fonts-liberation libasound2 libatk1.0-0 libatk-bridge2.0-0 \
-    libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libpango-1.0-0 \
-    libcairo2 libnss3 libxss1 libxtst6 libxshmfence1 xvfb && \
-    rm -rf /var/lib/apt/lists/*
+# Crea directorio de trabajo
+WORKDIR /usr/src/app
 
-# Set working directory
-WORKDIR /app
-
-# Copy package files first (better caching)
+# Copia dependencias e instala
 COPY package*.json ./
+RUN npm install --production
 
-# Install dependencies (Playwright will install Chromium)
-RUN npm install && npx playwright install chromium --with-deps
-
-# Copy the rest of your code
+# Copia el código
 COPY . .
 
-# Expose Render port
-ENV PORT=3000
-EXPOSE 3000
+# Expone el puerto
+EXPOSE 10000
 
-# Run your scraper server
+# Comando de inicio
 CMD ["npm", "start"]
